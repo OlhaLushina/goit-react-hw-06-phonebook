@@ -1,5 +1,6 @@
 import { createSlice, nanoid } from '@reduxjs/toolkit';
 import contactsInitialState from 'data/contacts.json';
+import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
 
 const contactsSlice = createSlice({
   // Ім'я слайсу

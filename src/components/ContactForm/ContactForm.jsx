@@ -1,8 +1,9 @@
 import { Field, Formik } from 'formik';
 import * as Yup from 'yup';
-import { nanoid } from 'nanoid';
 import { Form, Label, ErrorMessage, Button } from './ContactForm.styled';
-import PropTypes from 'prop-types';
+import { useSelector, useDispatch } from 'react-redux';
+import { addContact } from 'redux/contacts/contactsSlice';
+import { getContacts } from 'redux/selectors';
 
 /* Схема валідації */
 const ContactSchema = Yup.object().shape({
@@ -19,28 +20,43 @@ const ContactSchema = Yup.object().shape({
 });
 
 /* Компонент ContactForm */
-export const ContactForm = ({ onAdd }) => (
-  <Formik
-    initialValues={{ name: '', number: '' }}
-    validationSchema={ContactSchema}
-    onSubmit={(values, actions) => {
-      onAdd({ id: nanoid(), ...values });
-      actions.resetForm();
-    }}
-  >
-    <Form>
-      <Label htmlFor="name">Name</Label>
-      <Field name="name" />
-      <ErrorMessage name="name" component="div"></ErrorMessage>
-      <Label htmlFor="number">Number</Label>
-      <Field type="tel" name="number" />
-      <ErrorMessage name="number" component="div"></ErrorMessage>
-      <Button type="submit">Add contact</Button>
-    </Form>
-  </Formik>
-);
+export const ContactForm = () => {
+  const contacts = useSelector(getContacts);
+  const dispatch = useDispatch();
 
-/* Опис типів props */
-ContactForm.propTypes = {
-  onAdd: PropTypes.func.isRequired,
+  /* Додавання контакту */
+  const handleSubmit = newContact => {
+    if (
+      contacts.filter(
+        item =>
+          item.name.toLowerCase().trim() ===
+          newContact.name.toLowerCase().trim()
+      ).length > 0
+    ) {
+      alert(`${newContact.name} is already in contacts`);
+      return;
+    }
+    dispatch(addContact(newContact));
+  };
+
+  return (
+    <Formik
+      initialValues={{ name: '', number: '' }}
+      validationSchema={ContactSchema}
+      onSubmit={(values, actions) => {
+        handleSubmit({ ...values });
+        actions.resetForm();
+      }}
+    >
+      <Form>
+        <Label htmlFor="name">Name</Label>
+        <Field name="name" />
+        <ErrorMessage name="name" component="div"></ErrorMessage>
+        <Label htmlFor="number">Number</Label>
+        <Field type="tel" name="number" />
+        <ErrorMessage name="number" component="div"></ErrorMessage>
+        <Button type="submit">Add contact</Button>
+      </Form>
+    </Formik>
+  );
 };
